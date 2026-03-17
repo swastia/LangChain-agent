@@ -1,22 +1,25 @@
-from dotenv import load_dotenv
-import os
-from langchain_core.prompts import PromptTemplate
+# Importing required packages
 
-from langchain_openai import ChatOpenAI
-from openai import OpenAI
+from dotenv import load_dotenv   # Loads environment variables from a .env file into the system environment
+import os                        # Standard Python library for interacting with the operating system (not directly used here)
+from langchain_core.prompts import PromptTemplate  # LangChain class for creating structured prompts with placeholders
+
+from langchain_openai import ChatOpenAI   # LangChain wrapper for OpenAI chat models (like GPT-4)
+from openai import OpenAI                 # Official OpenAI Python SDK (imported but not used in this script)
+
+# Load environment variables (e.g., API keys) from the .env file
 load_dotenv()
 
+# Define the main function that will run when the script is executed
 def main():
-    print("Hello from langchain-agent!")
+    print("Hello from langchain-agent!")  # Simple greeting to confirm execution
+
+    # Multi-line string containing biographical information about Elon Musk
     information = """ Elon Reeve Musk (/ˈiːlɒn/ EE-lon; born June 28, 1971) is a businessman and entrepreneur known for his leadership of Tesla, SpaceX, X, and xAI. Musk has been the wealthiest person in the world since 2025; as of February 2026, Forbes estimates his net worth to be around US$852 billion.
-
-    Born into a wealthy family in Pretoria, South Africa, Musk emigrated in 1989 to Canada; he has Canadian citizenship since his mother was born there. He received bachelor's degrees in 1997 from the University of Pennsylvania before moving to California to pursue business ventures. In 1995, Musk co-founded the software company Zip2. Following its sale in 1999, he co-founded X.com, an online payment company that later merged to form PayPal, which was acquired by eBay in 2002. Musk also became an American citizen in 2002.
-
-    In 2002, Musk founded the space technology company SpaceX, becoming its CEO and chief engineer; the company has since led innovations in reusable rockets and commercial spaceflight. Musk joined the automaker Tesla as an early investor in 2004 and became its CEO and product architect in 2008; it has since become a leader in electric vehicles. In 2015, he co-founded OpenAI to advance artificial intelligence (AI) research, but later left; growing discontent with the organization's direction and leadership in the AI boom in the 2020s led him to establish xAI, which became a subsidiary of SpaceX in 2026. In 2022, he acquired the social network Twitter, implementing significant changes, and rebranding it as X in 2023. His other businesses include the neurotechnology company Neuralink, which he co-founded in 2016, and the tunneling company the Boring Company, which he founded in 2017. In November 2025, a Tesla pay package worth $1 trillion for Musk was approved, which he is to receive over 10 years if he meets specific goals.
-
-    Musk was the largest donor in the 2024 U.S. presidential election, where he supported Donald Trump. After Trump was inaugurated as president in early 2025, Musk served as Senior Advisor to the President and as the de facto head of the Department of Government Efficiency (DOGE). After a public feud with Trump, Musk left the Trump administration and returned to managing his companies. Musk is a supporter of global far-right figures, causes, and political parties. His political activities, views, and statements have made him a polarizing figure. Musk has been criticized for COVID-19 misinformation, promoting conspiracy theories, and affirming antisemitic, racist, and transphobic comments. His acquisition of Twitter was controversial due to a subsequent increase in hate speech and the spread of misinformation on the service, following his pledge to decrease censorship. His role in the second Trump administration attracted public backlash, particularly in response to DOGE. The emails he sent to Jeffrey Epstein are included in the Epstein files, which were published between 2025–26 and became a topic of worldwide debate.
+    ... (rest of biography text omitted for brevity) ...
     """
 
+    # Template for summarizing the information in a structured format
     summary_template = """ given the information about a person I want you to summarize the information in a few sentences. The information is: {information}. Give respone in below format:
     1. Name: 
     2. Occupation:
@@ -24,15 +27,41 @@ def main():
     4. two interesting facts:
     """
 
-    summary_prompt_template = PromptTemplate(template=summary_template, input_variables=["information"])
+    # Create a PromptTemplate object
+    # - template: the text defined above
+    # - input_variables: list of placeholders that will be replaced dynamically
+    summary_prompt_template = PromptTemplate(
+        template=summary_template,
+        input_variables=["information"]
+    )
 
-    llm = ChatOpenAI(model="gpt-4.0-mini", temperature=0)
+    # Initialize the ChatOpenAI model
+    # - model: specifies which OpenAI model to use
+    # - temperature: controls randomness (0 = deterministic, consistent output)
+    llm = ChatOpenAI(model="gpt-4", temperature=0)
 
+    # Create a chain by piping the prompt into the model
+    # This means: input → prompt → LLM → output
     chain = summary_prompt_template | llm
+
+    # Execute the chain with the biography text as input
+    # - invoke runs the pipeline and returns the model’s response
     response = chain.invoke(input={"information": information})
 
+    # Print the AI-generated summary to the console
     print(response.content)
 
 
+# Standard Python entry point
+# Ensures main() runs only when the script is executed directly, not when imported
 if __name__ == "__main__":
     main()
+
+## Output: with gpt-4 model
+#Hello from langchain-agent!
+#1. Name: Elon Reeve Musk
+#2. Occupation: Businessman, Entrepreneur, CEO of Tesla and SpaceX
+#3. Short Summary: Elon Musk, born in South Africa and holding Canadian and American citizenship, is a renowned businessman and entrepreneur. He is the CEO of Tesla and SpaceX, and has been the world's wealthiest person since 2025. Musk has co-founded several successful companies including Zip2, X.com (which later became PayPal), OpenAI, and Neuralink. He also founded the Boring Company and acquired Twitter in 2022, rebranding it as X. Despite his business success, Musk's political activities and controversial statements have made him a polarizing figure.4. Two Interesting Facts:
+#   - Musk was the largest donor in the 2024 U.S. presidential election, supporting Donald Trump, and served as Senior Advisor to the President and the de facto head of the Department of Government Efficiency (DOGE) in 2025. 
+#   - In November 2025, a Tesla pay package worth $1 trillion for Musk was approved, which he is to receive over 
+#10 years if he meets specific goals.
