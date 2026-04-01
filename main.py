@@ -37,7 +37,8 @@ agent = create_agent(model=llm, tools=tools)  # Create an agent with the specifi
 # Define the main function that will run when the script is executed
 def main():
     print("Hello from langchain-agent!")  # Simple greeting to confirm execution
-    result = agent.invoke({"messages": [HumanMessage(content="What is the weather is Pune, India?")]})  # Run the agent with a human message asking for the capital of France
+    #result = agent.invoke({"messages": [HumanMessage(content="What is the weather is Pune, India?")]})  # Run the agent with a human message asking for the capital of France
+    result = agent.invoke({"messages": [HumanMessage(content="search for 3 job postings for an ai engineer in Pune, India on naukari.com and list their details")]})  # Run the agent with a human message asking for the capital of France
     print(f"Agent response: {result}")  # Print the agent's response to the console
 
 # Standard Python entry point
@@ -56,3 +57,39 @@ if __name__ == "__main__":
 #Precipitation: 0.0 mm
 #Visibility: 10 km
 #Last updated: 2026-04-01 07:15 (local time)
+
+#####******* Replaced the query for linkedin to naukari.com because LLM was not able to extract the exact postings on linked in.
+#Output for naukari.com is:
+#***************************
+
+#Here are 3 AI Engineer job postings in Pune, India found on Naukri.com (with the details available from the listing pages):
+#AI Engineer - Pune - Infosys
+#
+#Company: Infosys Limited
+#Location: Pune
+#Experience: 7 to 8 years
+#Naukri link: https://www.naukri.com/job-listings-ai-engineer-infosys-limited-pune-7-to-8-years-230326930232
+#Key requirements (from listing snippet):
+#6+ years strong experience in AI model development
+#Expertise in deep learning and computer vision
+#
+#AI Engineer - Pune - Infinite
+#
+#Company: Infinite
+#Location: Pune
+#Experience: 4 to 6 years
+#Naukri link: https://www.naukri.com/job-listings-ai-engineer-infinite-pune-4-to-6-years-230326006730
+#Key requirements (from listing snippet):
+#AI Engineer role in Pune (full description available on the page)
+#
+#Senior AI Engineer - Pune - Onit
+#
+#Company: Onit
+#Location: Pune
+#Experience: 2 to 6 years
+#Naukri link: https://www.naukri.com/job-listings-senior-ai-engineer-onit-pune-2-to-6-years-300326500142
+#Key requirements (from listing snippet):
+#“AI Engineer - 3.5+ Years”
+#CTC range shown: 5–15 Lacs (as visible in snippet)
+#
+#If you want, tell me your experience level (e.g., 1-3, 3-6, 6+ years) and I’ll narrow these to the best matches and list additional fields (education, skills, job type) from the pages.
