@@ -9,13 +9,16 @@ from langchain_core.messages import HumanMessage  # LangChain class for represen
 from langchain_openai import ChatOpenAI   # LangChain wrapper for OpenAI chat models (like GPT-4)
 from openai import OpenAI                 # Official OpenAI Python SDK (imported but not used in this script)
 
-from tavily import TavilyClient  # Importing the Tavily client
+from langchain_tavily import TavilySearch  # Importing the Tavily client
+from tavily import TavilyClient
 
 # Load environment variables (e.g., API keys) from the .env file
 load_dotenv()
 
-tavily = TavilyClient()  # Initialize the Tavily client
+tavily = TavilyClient()  # Initialize the Tavily client to enable web search capabilities
 
+
+#**************************** Custom search tool definition ********************************#
 # define a tool that the agent can use to search the web for information
 @tool
 def search(query: str) -> str:
@@ -31,7 +34,7 @@ def search(query: str) -> str:
     return tavily.search(query)  # Use the Tavily client to perform the search and return results
 
 llm = ChatOpenAI(model="gpt-5.4-nano")  # Initialize the language model (GPT-4) using LangChain's wrapper
-tools = [search]  # Create a list of tools that the agent can use (currently only the search tool)
+tools = [TavilySearch()]  # Create a list of tools that the agent can use (currently only the search tool)
 agent = create_agent(model=llm, tools=tools)  # Create an agent with the specified LLM, tools
 
 # Define the main function that will run when the script is executed
@@ -93,3 +96,54 @@ if __name__ == "__main__":
 #CTC range shown: 5–15 Lacs (as visible in snippet)
 #
 #If you want, tell me your experience level (e.g., 1-3, 3-6, 6+ years) and I’ll narrow these to the best matches and list additional fields (education, skills, job type) from the pages.
+
+
+
+
+# Output from landchain tavily search :
+
+#Here are 3 AI Engineer job postings in Pune, India found on naukri.com (with available details from the listings):
+#
+#1) Artificial Intelligence (AI) Engineer - Pune - 6 to 8 years
+#
+#Company: Displays And Beyond
+#Experience: 6 - 8 years
+#Location: Pune
+#Posted: 1 week ago
+#Applicants: 100+
+#Job type / Salary: Not disclosed (as shown)
+#Link: https://www.naukri.com/job-listings-artificial-intelligence-ai-engineer-displays-and-beyond-pvt-ltd-pune-6-to-8-years-170326922055
+#Key responsibilities (from listing):
+#Build and deploy AI/ML models for business problems
+#Optimize algorithms for prediction/automation
+#Train/validate models on large datasets
+#Implement NLP or Computer Vision when needed
+#Integrate models with applications (with data/software teams)
+#Monitor performance and improve accuracy/efficiency
+#
+#
+#2) AI Engineer I - Pune - Microstrategy - 2 to 3 years
+#
+#Company: Microstrategy
+#Experience: 2 - 3 years
+#Location: Pune
+#Job type / Salary: Full Time, Permanent (as shown) / (salary not shown in snippet)
+#Link: https://www.naukri.com/job-listings-ai-engineer-i-strategy-pune-2-to-3-years-080525501264
+#Key skills / focus (from listing):
+#Python development
+#REST API development using FastAPI
+#Unit testing, OOP/module creation
+#Cloud infrastructure
+#AI model integration / deployment
+#(Also lists skills like GCP, NLP, data visualization, Git, etc.)
+#
+#
+#3) Artificial Intelligence Engineer / AI Engineer - VP - Deutsche Bank
+#
+#Company: Deutsche Bank
+#Experience: 14 - 24 years
+#Location: Hybrid - Pune
+#Link: https://www.naukri.com/artificial-intelligence-jobs-in-pune (listed within the Pune AI jobs results page)
+#Job focus (from page snippet):
+#Strategic AI solution development (end-to-end AI architecture)
+#Mentions Agentic AI, GenAI/Generative AI, Python, AI engineering
