@@ -9,8 +9,12 @@ from langchain_core.messages import HumanMessage  # LangChain class for represen
 from langchain_openai import ChatOpenAI   # LangChain wrapper for OpenAI chat models (like GPT-4)
 from openai import OpenAI                 # Official OpenAI Python SDK (imported but not used in this script)
 
+from tavily import TavilyClient  # Importing the Tavily client
+
 # Load environment variables (e.g., API keys) from the .env file
 load_dotenv()
+
+tavily = TavilyClient()  # Initialize the Tavily client
 
 # define a tool that the agent can use to search the web for information
 @tool
@@ -24,9 +28,9 @@ def search(query: str) -> str:
         str: The search results."""
     
     print(f"Performing search for query: '{query}'")  # Log the search query for debugging
-    return f"Search results for '{query}'"
+    return tavily.search(query)  # Use the Tavily client to perform the search and return results
 
-llm = ChatOpenAI(model="gpt-4")  # Initialize the language model (GPT-4) using LangChain's wrapper
+llm = ChatOpenAI(model="gpt-5.4-nano")  # Initialize the language model (GPT-4) using LangChain's wrapper
 tools = [search]  # Create a list of tools that the agent can use (currently only the search tool)
 agent = create_agent(model=llm, tools=tools)  # Create an agent with the specified LLM, tools
 
@@ -40,3 +44,15 @@ def main():
 # Ensures main() runs only when the script is executed directly, not when imported
 if __name__ == "__main__":
     main()
+
+
+
+#sample output for a simple search query "What is the weather is Pune, India?" using tavily search tool and gpt-5.4-nano model:
+#Right now in Pune, India, it’s Sunny.
+#Temperature: 25.4°C (feels like 26.4°C)
+#Humidity: 58%
+#Wind: 5.4 kph from NW
+#Cloud cover: 22%
+#Precipitation: 0.0 mm
+#Visibility: 10 km
+#Last updated: 2026-04-01 07:15 (local time)
