@@ -8,14 +8,27 @@ from langchain_core.tools import Tool, tool  # LangChain class for defining tool
 from langchain_core.messages import HumanMessage  # LangChain class for representing messages from a human user 
 from langchain_openai import ChatOpenAI   # LangChain wrapper for OpenAI chat models (like GPT-4)
 from openai import OpenAI                 # Official OpenAI Python SDK (imported but not used in this script)
+from typing import List
 
 from langchain_tavily import TavilySearch  # Importing the Tavily client
 from tavily import TavilyClient
+from pydantic import BaseModel, Field
 
 # Load environment variables (e.g., API keys) from the .env file
 load_dotenv()
 
 tavily = TavilyClient()  # Initialize the Tavily client to enable web search capabilities
+
+class Source(BaseModel):
+    """Represents a source of information for the agent's responses."""
+    #name: str = Field(..., description="The name of the source (e.g., website or database).")
+    url: str = Field(..., description="The URL where the information was obtained.")
+    #description: str = Field(..., description="A brief description of the source and its relevance to the query.")
+
+class AgentResponse(BaseModel):
+    """Represents the structured response from the agent, including the answer and its sources."""
+    answer: str = Field(..., description="The agent's response to the user's query.")
+    sources: List[Source] = Field(default_factory=list, description="A list of sources used to generatte the answer, with details about each source.")
 
 
 #**************************** Custom search tool definition ********************************#
@@ -35,7 +48,7 @@ def search(query: str) -> str:
 
 llm = ChatOpenAI(model="gpt-5.4-nano")  # Initialize the language model (GPT-4) using LangChain's wrapper
 tools = [TavilySearch()]  # Create a list of tools that the agent can use (currently only the search tool)
-agent = create_agent(model=llm, tools=tools)  # Create an agent with the specified LLM, tools
+agent = create_agent(model=llm, tools=tools, response_format=AgentResponse)  # Create an agent with the specified LLM, tools, and response format
 
 # Define the main function that will run when the script is executed
 def main():
