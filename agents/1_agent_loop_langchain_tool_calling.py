@@ -4,6 +4,7 @@ load_dotenv()  # Load environment variables (e.g., API keys) from the .env file
 from langchain.chat_models import init_chat_model
 from langchain.tools import tool
 from langchain.messages import HumanMessage, SystemMessage, ToolMessage
+from langsmith import traceable
 
 MAX_ITERATIONS = 10  # Maximum number of iterations for the agent loop
 MODEL = "llama3.2:latest" # my locally installed ollama model
@@ -39,3 +40,15 @@ def apply_discount(price: float, discount_tier: str) -> float:
     return round(price * (1 - discount_rate), 2)
 
 
+# ----- Agent Loop -----
+@traceable(name="Langchain Agent Loop")
+def run_agent(question: str):
+    """Runs the agent loop to answer the question using the defined tools."""
+    pass
+
+if __name__ == "__main__":
+    # Example question for the agent to answer
+    question = "What is the price of a laptop after applying a silver discount?"
+    print(f"Question: {question}")
+    result = run_agent(question)
+    print(f"Final result: {result}")
