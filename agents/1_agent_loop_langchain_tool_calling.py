@@ -75,16 +75,45 @@ def run_agent(question: str):
         ai_message = llm_with_tools.invoke(messages)  # Get the AI's response based on the current messages
         tool_calls = ai_message.tool_calls  # Extract any tool calls made by the AI in its response
 
+        print(tool_calls)
+
         # If no tool calls were made, we assume the AI has provided a final answer and we can return it
         if not tool_calls:
             print("Final Answer:", ai_message.content)
             return ai_message.content
 
+        # Process only the first tool call made by the AI for simplicity
+        tool_call = tool_calls[0]
+        tool_name = tool_call.get("name")  # Get the name of the tool being called
+        tool_args = tool_call.get("args")  # Get the arguments for the tool call
+        tools_call_id = tool_call.get("id")  # Get the unique ID for this tool call
+        print(f"Tool call detected: {tool_name} with args {tool_args}")
+        tool_to_call = tools_dict.get(tool_name)  # Retrieve the actual tool function based on the name
+        if not tool_to_call:
+            print(f"Error: Tool '{tool_name}' not found.")
+            raise ValueError(f"Tool '{tool_name}' not found.")
+            return f"Error: Tool '{tool_name}' not found."
+        observation = tool_to_call.invoke(tool_args)  # Call the tool with the provided arguments and get the observation/result
+        print(f"Observation from tool '{tool_name}': {observation}")
+
+        # Add the AI's message, the tool call, and the observation to the messages for the next iteration
+        messages.append(ai_message)  # Add the AI's message to the conversation history
+        messages.append(
+            ToolMessage(
+                content = str(observation),  # Add the observation from the tool call as a ToolMessage
+                tool_call_id = tools_call_id  # Associate this observation with the specific tool call ID
+            )
+        )
+
+    # If we reach the maximum number of iterations without a final answer, return an error message
+    print("Error: Maximum iterations reached without a final answer.")
+    return None
+
 
 
 if __name__ == "__main__":
     # Example question for the agent to answer
-    question = "What is the price of a laptop after applying a silver discount?"
+    question = "What is the price of a laptop after applying a gold discount?"
     print(f"Question: {question}")
     result = run_agent(question)
     print(f"Final result: {result}")
