@@ -31,12 +31,15 @@ def apply_discount(price: float, discount_tier: str) -> float:
     Available discount tiers: bronze, silver, gold"
     """
     print(f"Applying discount: '{discount_tier}' to price: {price}")
+    if price <= 0:
+        raise ValueError(f"Invalid price: {price}")
+    
     discounts = {
         "bronze": 0.05,  # 5% discount
         "silver": 0.10,  # 10% discount
         "gold": 0.20     # 20% discount
     }
-    discount_rate = discounts.get(discount_tier, 0)
+    discount_rate = discounts.get(discount_tier.strip().lower(), 0)
     return round(price * (1 - discount_rate), 2)
 
 
@@ -81,29 +84,53 @@ def run_agent(question: str):
         if not tool_calls:
             print("Final Answer:", ai_message.content)
             return ai_message.content
+        
+        # keep ai_message in history
+        messages.append(ai_message)
+        
+        # Process all tool calls at once
+        for tool_call in tool_calls:
+            tool_name = tool_call.get("name")  # Get the name of the tool being called
+            tool_args = tool_call.get("args")  # Get the arguments for the tool call
+            tools_call_id = tool_call.get("id")  # Get the unique ID for this tool call
+            print(f"Tool call detected: {tool_name} with args {tool_args}")
+            tool_to_call = tools_dict.get(tool_name)  # Retrieve the actual tool function based on the name
+            if not tool_to_call:
+                print(f"Error: Tool '{tool_name}' not found.")
+                raise ValueError(f"Tool '{tool_name}' not found.")
 
-        # Process only the first tool call made by the AI for simplicity
-        tool_call = tool_calls[0]
-        tool_name = tool_call.get("name")  # Get the name of the tool being called
-        tool_args = tool_call.get("args")  # Get the arguments for the tool call
-        tools_call_id = tool_call.get("id")  # Get the unique ID for this tool call
-        print(f"Tool call detected: {tool_name} with args {tool_args}")
-        tool_to_call = tools_dict.get(tool_name)  # Retrieve the actual tool function based on the name
-        if not tool_to_call:
-            print(f"Error: Tool '{tool_name}' not found.")
-            raise ValueError(f"Tool '{tool_name}' not found.")
-            return f"Error: Tool '{tool_name}' not found."
-        observation = tool_to_call.invoke(tool_args)  # Call the tool with the provided arguments and get the observation/result
-        print(f"Observation from tool '{tool_name}': {observation}")
+            #Execute the tool call and get the observation/result
+            #TODO: fix the output from tool1 to send as input to tool2.
+            observation = tool_to_call.invoke(tool_args)  # Call the tool with the provided arguments
+            print(f"Observation from tool '{tool_name}': {observation}")
+            # Add the observation from the tool call as a ToolMessage to the messages for the next iteration
+            messages.append(
+                ToolMessage(
+                    content = str(observation),  # Add the observation from the tool call as a ToolMessage
+                    tool_call_id = tools_call_id)  # Associate this observation with the specific tool call ID
+            )            
 
-        # Add the AI's message, the tool call, and the observation to the messages for the next iteration
-        messages.append(ai_message)  # Add the AI's message to the conversation history
-        messages.append(
-            ToolMessage(
-                content = str(observation),  # Add the observation from the tool call as a ToolMessage
-                tool_call_id = tools_call_id  # Associate this observation with the specific tool call ID
-            )
-        )
+#        # Process only the first tool call made by the AI for simplicity
+#        tool_call = tool_calls[0]
+#        tool_name = tool_call.get("name")  # Get the name of the tool being called
+#        tool_args = tool_call.get("args")  # Get the arguments for the tool call
+#        tools_call_id = tool_call.get("id")  # Get the unique ID for this tool call
+#        print(f"Tool call detected: {tool_name} with args {tool_args}")
+#        tool_to_call = tools_dict.get(tool_name)  # Retrieve the actual tool function based on the name
+#        if not tool_to_call:
+#            print(f"Error: Tool '{tool_name}' not found.")
+#            raise ValueError(f"Tool '{tool_name}' not found.")
+#            return f"Error: Tool '{tool_name}' not found."
+#        observation = tool_to_call.invoke(tool_args)  # Call the tool with the provided arguments and get the observation/result
+#        print(f"Observation from tool '{tool_name}': {observation}")
+#
+#        # Add the AI's message, the tool call, and the observation to the messages for the next iteration
+#        messages.append(ai_message)  # Add the AI's message to the conversation history
+#        messages.append(
+#            ToolMessage(
+#                content = str(observation),  # Add the observation from the tool call as a ToolMessage
+#                tool_call_id = tools_call_id)  # Associate this observation with the specific tool call ID
+#        )
 
     # If we reach the maximum number of iterations without a final answer, return an error message
     print("Error: Maximum iterations reached without a final answer.")
